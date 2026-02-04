@@ -18,6 +18,10 @@ Interactive dojo access through screen or tmux. Discovers running ship sessions,
 
 Includes a dojo command reference covering generators, hood commands, threads, and agent interaction, along with safety guards for destructive operations.
 
+## Contributing
+
+To create new skills for this repository, see [AGENTS.md](AGENTS.md) for a complete guide on skill creation, frontmatter configuration, and best practices for Urbit-specific skills.
+
 ## Installation
 
 Add the skills directory to your Claude Code configuration:
