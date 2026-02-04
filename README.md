@@ -26,6 +26,62 @@ These skills give coding agents practical knowledge of the Urbit runtime, Hoon p
 
 ## Skills
 
+### Ship Interaction
+
+| Skill | Type | Description |
+|-------|------|-------------|
+| [urbit-conn](./skills/urbit-conn/) | Interaction | Programmatic ship control via conn.sock -- scry, runtime queries, thread execution, event injection |
+| [urbit-terminal](./skills/urbit-terminal/) | Interaction | Interactive dojo access via screen/tmux -- command execution, output capture, safety guards |
+
+### Ship Operations & Deployment
+
+| Skill | Type | Description |
+|-------|------|-------------|
+| [urbit-fundamentals](./skills/urbit-fundamentals/) | Knowledge | Nock, Hoon, Arvo, vanes, Azimuth, Ames |
+| [urbit-troubleshooting](./skills/urbit-troubleshooting/) | Knowledge | Systematic diagnostics |
+| [ship-deployment-guide](./skills/ship-deployment-guide/) | Knowledge | Step-by-step deployment procedures |
+| [vps-deployment-providers](./skills/vps-deployment-providers/) | Knowledge | DigitalOcean, Linode, Vultr, AWS, Hetzner |
+| [groundseg-installation](./skills/groundseg-installation/) | Knowledge | Docker setup, Anchor networking, MinIO S3 |
+| [groundseg-troubleshooting](./skills/groundseg-troubleshooting/) | Knowledge | Container issues, DNS, SSL certificates |
+| [kubernetes-urbit](./skills/kubernetes-urbit/) | Knowledge | StatefulSets, persistent volumes, GitOps |
+| [multi-ship-orchestration](./skills/multi-ship-orchestration/) | Knowledge | Resource allocation, network isolation |
+| [fleet-operations](./skills/fleet-operations/) | Knowledge | Terraform IaC, Helm, staged OTA updates |
+| [managed-hosting-comparison](./skills/managed-hosting-comparison/) | Knowledge | Tlon, Red Horizon, and hosting providers |
+| [minio-s3-integration](./skills/minio-s3-integration/) | Knowledge | Self-hosted S3 for ship storage |
+| [performance-engineer-assistant](./skills/performance-engineer-assistant/) | Assistant | Performance troubleshooting and tuning |
+| [deploy-planet-workflow](./skills/deploy-planet-workflow/) | Workflow | Bare-metal planet deployment (10 phases) |
+| [deploy-vps-planet-workflow](./skills/deploy-vps-planet-workflow/) | Workflow | VPS-optimized deployment |
+| [deploy-groundseg-workflow](./skills/deploy-groundseg-workflow/) | Workflow | Multi-ship Docker orchestration |
+| [deploy-fleet-workflow](./skills/deploy-fleet-workflow/) | Workflow | Kubernetes fleet deployment (100+ ships) |
+| [setup-production-workflow](./skills/setup-production-workflow/) | Workflow | 20-phase security hardening |
+| [setup-monitoring-workflow](./skills/setup-monitoring-workflow/) | Workflow | Observability stack deployment |
+| [setup-cicd-pipeline-workflow](./skills/setup-cicd-pipeline-workflow/) | Workflow | CI/CD for ship updates |
+| [troubleshoot-ship-workflow](./skills/troubleshoot-ship-workflow/) | Workflow | Systematic diagnostic decision trees |
+| [migrate-deployment-workflow](./skills/migrate-deployment-workflow/) | Workflow | Zero-downtime migration |
+| [optimize-performance-workflow](./skills/optimize-performance-workflow/) | Workflow | Performance tuning |
+| [orchestrate-deployment-workflow](./skills/orchestrate-deployment-workflow/) | Workflow | Intelligent deployment coordination |
+
+### Monitoring, Backup & Reliability
+
+| Skill | Type | Description |
+|-------|------|-------------|
+| [monitoring-observability](./skills/monitoring-observability/) | Knowledge | Prometheus, Grafana, Loki, AlertManager |
+| [performance-optimization](./skills/performance-optimization/) | Knowledge | Disk I/O, memory, network tuning |
+| [performance-profiling](./skills/performance-profiling/) | Knowledge | Bottleneck identification, capacity planning |
+| [sla-management](./skills/sla-management/) | Knowledge | Uptime targets, incident response, error budgets |
+| [backup-disaster-recovery](./skills/backup-disaster-recovery/) | Knowledge | Automated backups, restoration procedures |
+| [disaster-recovery-advanced](./skills/disaster-recovery-advanced/) | Knowledge | Multi-region failover, cross-region replication |
+
+### Networking & Security
+
+| Skill | Type | Description |
+|-------|------|-------------|
+| [anchor-networking](./skills/anchor-networking/) | Knowledge | Reverse proxy, Let's Encrypt SSL, custom domains |
+| [network-security-advanced](./skills/network-security-advanced/) | Knowledge | Zero-trust networking, VPNs, network policies |
+| [container-security](./skills/container-security/) | Knowledge | User namespaces, capabilities, AppArmor |
+| [advanced-security-patterns](./skills/advanced-security-patterns/) | Knowledge | Defense-in-depth, intrusion detection |
+| [compliance-frameworks](./skills/compliance-frameworks/) | Knowledge | GDPR, HIPAA, SOC2, ISO 27001 |
+
 ### Hoon Development
 
 | Skill | Type | Description |
@@ -85,62 +141,6 @@ These skills give coding agents practical knowledge of the Urbit runtime, Hoon p
 | [hoon-to-nock-workflow](./skills/hoon-to-nock-workflow/) | Workflow | Analyze Hoon compilation output |
 | [nock-implement-exercise-workflow](./skills/nock-implement-exercise-workflow/) | Workflow | Hands-on guided exercises |
 | [orchestrate-interpreter-workflow](./skills/orchestrate-interpreter-workflow/) | Workflow | Complete Nock mastery orchestration |
-
-### Ship Interaction
-
-| Skill | Type | Description |
-|-------|------|-------------|
-| [urbit-conn](./skills/urbit-conn/) | Interaction | Programmatic ship control via conn.sock -- scry, runtime queries, thread execution, event injection |
-| [urbit-terminal](./skills/urbit-terminal/) | Interaction | Interactive dojo access via screen/tmux -- command execution, output capture, safety guards |
-
-### Ship Operations & Deployment
-
-| Skill | Type | Description |
-|-------|------|-------------|
-| [urbit-fundamentals](./skills/urbit-fundamentals/) | Knowledge | Nock, Hoon, Arvo, vanes, Azimuth, Ames |
-| [urbit-troubleshooting](./skills/urbit-troubleshooting/) | Knowledge | Systematic diagnostics |
-| [ship-deployment-guide](./skills/ship-deployment-guide/) | Knowledge | Step-by-step deployment procedures |
-| [vps-deployment-providers](./skills/vps-deployment-providers/) | Knowledge | DigitalOcean, Linode, Vultr, AWS, Hetzner |
-| [groundseg-installation](./skills/groundseg-installation/) | Knowledge | Docker setup, Anchor networking, MinIO S3 |
-| [groundseg-troubleshooting](./skills/groundseg-troubleshooting/) | Knowledge | Container issues, DNS, SSL certificates |
-| [kubernetes-urbit](./skills/kubernetes-urbit/) | Knowledge | StatefulSets, persistent volumes, GitOps |
-| [multi-ship-orchestration](./skills/multi-ship-orchestration/) | Knowledge | Resource allocation, network isolation |
-| [fleet-operations](./skills/fleet-operations/) | Knowledge | Terraform IaC, Helm, staged OTA updates |
-| [managed-hosting-comparison](./skills/managed-hosting-comparison/) | Knowledge | Tlon, Red Horizon, and hosting providers |
-| [minio-s3-integration](./skills/minio-s3-integration/) | Knowledge | Self-hosted S3 for ship storage |
-| [performance-engineer-assistant](./skills/performance-engineer-assistant/) | Assistant | Performance troubleshooting and tuning |
-| [deploy-planet-workflow](./skills/deploy-planet-workflow/) | Workflow | Bare-metal planet deployment (10 phases) |
-| [deploy-vps-planet-workflow](./skills/deploy-vps-planet-workflow/) | Workflow | VPS-optimized deployment |
-| [deploy-groundseg-workflow](./skills/deploy-groundseg-workflow/) | Workflow | Multi-ship Docker orchestration |
-| [deploy-fleet-workflow](./skills/deploy-fleet-workflow/) | Workflow | Kubernetes fleet deployment (100+ ships) |
-| [setup-production-workflow](./skills/setup-production-workflow/) | Workflow | 20-phase security hardening |
-| [setup-monitoring-workflow](./skills/setup-monitoring-workflow/) | Workflow | Observability stack deployment |
-| [setup-cicd-pipeline-workflow](./skills/setup-cicd-pipeline-workflow/) | Workflow | CI/CD for ship updates |
-| [troubleshoot-ship-workflow](./skills/troubleshoot-ship-workflow/) | Workflow | Systematic diagnostic decision trees |
-| [migrate-deployment-workflow](./skills/migrate-deployment-workflow/) | Workflow | Zero-downtime migration |
-| [optimize-performance-workflow](./skills/optimize-performance-workflow/) | Workflow | Performance tuning |
-| [orchestrate-deployment-workflow](./skills/orchestrate-deployment-workflow/) | Workflow | Intelligent deployment coordination |
-
-### Monitoring, Backup & Reliability
-
-| Skill | Type | Description |
-|-------|------|-------------|
-| [monitoring-observability](./skills/monitoring-observability/) | Knowledge | Prometheus, Grafana, Loki, AlertManager |
-| [performance-optimization](./skills/performance-optimization/) | Knowledge | Disk I/O, memory, network tuning |
-| [performance-profiling](./skills/performance-profiling/) | Knowledge | Bottleneck identification, capacity planning |
-| [sla-management](./skills/sla-management/) | Knowledge | Uptime targets, incident response, error budgets |
-| [backup-disaster-recovery](./skills/backup-disaster-recovery/) | Knowledge | Automated backups, restoration procedures |
-| [disaster-recovery-advanced](./skills/disaster-recovery-advanced/) | Knowledge | Multi-region failover, cross-region replication |
-
-### Networking & Security
-
-| Skill | Type | Description |
-|-------|------|-------------|
-| [anchor-networking](./skills/anchor-networking/) | Knowledge | Reverse proxy, Let's Encrypt SSL, custom domains |
-| [network-security-advanced](./skills/network-security-advanced/) | Knowledge | Zero-trust networking, VPNs, network policies |
-| [container-security](./skills/container-security/) | Knowledge | User namespaces, capabilities, AppArmor |
-| [advanced-security-patterns](./skills/advanced-security-patterns/) | Knowledge | Defense-in-depth, intrusion detection |
-| [compliance-frameworks](./skills/compliance-frameworks/) | Knowledge | GDPR, HIPAA, SOC2, ISO 27001 |
 
 ## Requirements
 
