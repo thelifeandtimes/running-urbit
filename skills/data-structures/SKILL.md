@@ -405,7 +405,72 @@ j  ::  {[%group {1 2}]}
 
 **Best for**: Many-to-many relationships, tagging, categorization
 
-## 6. Custom Data Structures
+## 6. Mips
+
+### Structure
+
+**Mips** are maps of maps as balanced trees:
+:: note that mip is in its own non-standard file
+:: using any mip arm requires qualifying the arm bi:mip with the file
+:: for example: mip:mip
+```hoon
+|%
+++  mip                                                 ::  map of maps
+  |$  [kex key value]
+  (map kex (map key value))
+```
+
+### Construction
+
+```hoon
+::  Empty mip
+*(mip:mip @p @tas typ-addr)
+
+::  From list of pairs
+(my ~[[%a 1] [%b 2] [%c 3]])
+
+::  Using ~(bi mip)
+=/  m  *(mip:mip @p @tas @ud)
+=.  m  %^  ~(put bi:mip lookup)  ~sampel-palnet
+                                 'word'
+                                 42
+```
+
+### Core Operations
+
+```hoon
+=/  my-mip  *(mip:mip @tas @tas @ud)
+
+::  Del (remove)
+(~(del bi:mip my-mip) %a %b)
+
+::  Get (lookup)
+(~(get bi:mip my-mip) %a %b)    ::  `1
+(~(get bi:mip my-mip) %z %d)    ::  ~ (not found)
+
+::  Got (lookup, crash if missing)
+(~(got bi:mip my-mip) %a %b)    ::  1
+
+::  Gut (get with default)
+(~(gut bi:mip my-mip) %z %d 42)  ::  42 (default)
+
+::  Has (key exists?)
+(~(has bi:mip my-mip) %a %b)    ::  %.y
+(~(has bi:mip my-mip) %z %d)    ::  %.n
+
+:: Key (returns the set of second keys referenceb by first key)
+(~(key bi:mip my-mip) %a)       :: {%b}
+(~(key bi:mip my-mip) %z)       ::  ~
+                       
+::  Put (insert/update)
+(~(put bi:mip my-mip) %a %b 4)
+
+::  Tap (convert to list of pairs)
+~(tap bi:mip my-mip)         ::  ~[[%a %b 1] [%aa %b 2] [%aaa %c 3]]
+
+```
+
+## 7. Custom Data Structures
 
 ### Queue (FIFO)
 
@@ -468,7 +533,7 @@ j  ::  {[%group {1 2}]}
   ...
 ```
 
-## 7. Choosing Data Structures
+## 8. Choosing Data Structures
 
 ### Decision Guide
 
@@ -501,7 +566,7 @@ j  ::  {[%group {1 2}]}
 | map | O(log n) | O(log n) | O(log n) | O(n log n) |
 | jar/jug | O(log n) | O(log n) | O(log n) | O(n log n) |
 
-## 8. Common Patterns
+## 9. Common Patterns
 
 ### Pattern 1: Convert Between Structures
 
@@ -583,8 +648,10 @@ Hoon data structures:
 1. **Lists** - Sequential, O(1) prepend, good for small collections
 2. **Sets** - Unique elements, O(log n) operations
 3. **Maps** - Key-value, O(log n) lookup
-4. **Jars/Jugs** - Multi-valued mappings
-5. **Choose based on** access patterns and performance needs
-6. **Custom structures** for specialized requirements
+4. **Mops** -  (Ordered Maps)
+5. **Jars/Jugs** - Multi-valued mappings
+6. **Mips** - maps of maps
+7. **Choose based on** access patterns and performance needs
+8. **Custom structures** for specialized requirements
 
 Mastering data structure selection and usage is key to writing efficient Hoon code.
