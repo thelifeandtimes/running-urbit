@@ -558,7 +558,9 @@ Many stdlib functions have **jets** (C implementations) for performance:
 ### Pattern 1: Safe List Access
 
 ```hoon
-=/  items  ~[1 2 3]
+:: the list constructor, limo, turns a null-terminated tuple into a list.
+=/  items  (limo ~[1 2 3])
+:: validate a list to be not empty before i, the head indicator, or t the tail indicator can be used
 =/  first  ?~(items ~ `i.items)  ::  Safe head
 =/  at-idx  (snag 5 items)       ::  Crashes if out of bounds
 
