@@ -198,7 +198,7 @@ false-branch
 
 ### Line Length
 
-**Aim for 80 characters, max 100**:
+**Aim for maximum of 80 characters**:
 ```hoon
 ::  ✓ Good: Wrap long lines
 =/  very-long-computation
@@ -340,10 +340,6 @@ false-branch
 ::  Complex operations
 ++  create-user
   |=  [name=@t email=@t]
-  ...
-
-::  Internal helpers (prefix with `-`)
-++  -validate
   ...
 --
 ```
