@@ -352,6 +352,19 @@ echo "[0 %fyrd %base %thread-name %output-mark %input-mark <input-noun>]" | urbi
 echo "[0 %ovum <raw-kernel-move>]" | urbit eval -jn | nc -U -W 1 /path/to/pier/.urb/conn.sock | urbit eval -cn
 ```
 
+## %gx scries (important gotchas)
+
+- `%gx` is a **Gall (app) scry**.
+- The **mark is part of the path** (eg `.../count/noun`, `.../pill/noun`).
+- Your agent’s `on-peek` will typically see the path **prefixed with `/x`**.
+  - Example: a `%gx` request to `.../count/noun` arrives at the agent as `path=/x/count`.
+- `.^` returns the **decoded product**, *not* a `cage`.
+  - So you usually want something like:
+    - `.^(noun %gx /(scot %p p.bec)/myapp/(scot %da now)/foo/noun)`
+    - or `.^(pill:pill %gx /(scot %p p.bec)/aqua/(scot %da now)/pill/noun)`
+  - **Don’t** try to decode `%gx` as `(unit cage)` unless you’re sure the scry actually returns a cage.
+- If the target app isn’t running, `%gx` can **hard-fail** (eg `bail: 4`, `arvo: scry-lost`) rather than returning `~`.
+
 ## Response Format
 
 Responses from conn.c are newt-encoded jammed nouns: `[request-id output]`.
