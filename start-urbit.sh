@@ -220,6 +220,26 @@ get_runtime_label() {
     echo "urbit (latest)"
 }
 
+detect_ship_name() {
+    local ship=""
+
+    if [ ! -f "$LOGFILE" ]; then
+        return
+    fi
+
+    ship=$(grep -E "mdns: .* registered" "$LOGFILE" | tail -1 | sed -n 's/.*mdns: \([^ ]*\) registered.*/\1/p')
+    if [ -z "$ship" ]; then
+        ship=$(grep -E "pier .* live" "$LOGFILE" | tail -1 | sed -n 's/.*pier \(~\?[a-z-]*\) live.*/\1/p')
+    fi
+
+    if [ -n "$ship" ]; then
+        if [[ "$ship" != ~* ]]; then
+            ship="~$ship"
+        fi
+        echo "$ship"
+    fi
+}
+
 ensure_pill() {
     if [ ! -f "$PILL_PATH" ]; then
         script_error "Boot pill not found."
@@ -531,6 +551,11 @@ if [ ! -z "$CODE_FOUND" ]; then
     script_info "$LOGIN_URL"
 else
    script_msg "Could not retrieve code automatically."
+fi
+
+SHIP_NAME=$(detect_ship_name)
+if [ -n "$SHIP_NAME" ]; then
+    script_info "Comet: $SHIP_NAME"
 fi
 
 echo ""
