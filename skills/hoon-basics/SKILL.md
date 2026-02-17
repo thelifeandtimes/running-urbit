@@ -87,6 +87,26 @@ not-null-case
 cell-case
 ```
 
+### Single-Expression Branch Rule
+
+Conditional runes (`?:`, `?~`, `?@`, etc.) take exactly **one hoon expression** for each branch. If a branch requires multiple statements, extract them into a separate arm and call it as a single expression.
+
+**Exception:** `~&` and `~|` hint runes fuse with their following rune into one statement, so `~|("error" (some-gate ...))` counts as one expression.
+
+```hoon
+::  CORRECT: single expression in true branch
+?~  tbl  (from-cte qualified-table named-ctes)
+
+::  CORRECT: ~| hint fuses with following expression
+?~  tbl  ~|("not found" !!)
+
+::  WRONG: multiple statements in true branch — must use a separate arm
+?~  tbl
+  =/  x  (some-gate ...)
+  =/  y  i.x
+  (another-gate y)
+```
+
 ## Lists
 
 ```hoon
@@ -100,6 +120,31 @@ cell-case
 (weld list1 list2) ::  Concatenate
 (turn list gate)   ::  Map
 (roll list gate)   ::  Reduce/fold
+```
+
+### List Head/Tail Access: `i.` and `t.`
+
+`i.list` (head) and `t.list` (tail) are **only valid after the compiler knows the list is non-empty**. The type system enforces this — code that uses `i.` or `t.` on a `(list)` without first narrowing to a non-empty list will fail to compile.
+
+Use `?~` to narrow the type:
+
+```hoon
+=/  items=(list @ud)  ~[1 2 3]
+::
+::  WRONG: i.items and t.items here — compiler rejects
+::
+?~  items  ~            ::  handle empty case
+::  CORRECT: after ?~, compiler knows items is non-empty
+=/  first  i.items      ::  head: 1
+=/  rest   t.items      ::  tail: ~[2 3]
+```
+
+This applies to any list-typed expression, including faces on cores:
+
+```hoon
+=/  cte-fr  (some-gate ...)
+?~  set-tables.cte-fr  !!
+=/  first-st  i.set-tables.cte-fr   ::  valid after ?~
 ```
 
 ## Common Idioms
