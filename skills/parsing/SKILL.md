@@ -559,6 +559,48 @@ A parser is a `rule` that consumes input and produces a result:
   ==
 ```
 
+### Pattern 4: Normalizing Duplicate Parsers
+
+When two `;~ pose` parsers match identical input but produce different
+intermediate tuples (e.g., one for direct use, one for cooking into a typed
+AST), unify them by normalizing the intermediate form.
+
+**Problem**: two parsers for qualified names with different output shapes:
+```hoon
+::  Parser A: preserves raw dots for double-dot syntax
+;~(plug sym dot ;~(pfix dot sym) ;~(pfix dot sym))
+::  output: [db '.' obj col]  -- ambiguous: is '.' a namespace or a gap?
+
+::  Parser B: uses ~ for missing parts
+;~(plug sym (cold ~ dot) ;~(pfix dot sym) ;~(pfix dot sym))
+::  output: [db ~ obj col]  -- clear: namespace is missing
+```
+
+**Solution**: use `(cold ~ dot)` and `(stag ~)` to normalize missing parts
+into `~`, then use `?~` in the cook function:
+
+```hoon
+++  parse-name  ~+
+  ;~  pose
+    ;~((glue dot) sym sym sym sym)                 ::  [db ns obj col]
+    ;~(plug sym (cold ~ dot) ;~(pfix dot sym) ;~(pfix dot sym))
+    ::                                                [db ~  obj col]
+    (stag ~ ;~((glue dot) sym sym sym))            ::  [~  ns obj col]
+    ;~(plug mixed-case-symbol ;~(pfix dot sym))    ::  [alias col]
+    sym                                             ::  col
+  ==
+
+++  cook-name
+  |=  a=*
+  ?:  ?=([@ @ @ @] a)
+    ::  4-item: db or ns may be ~
+    [?~(-.a default-db -.a) ?~(+<.a 'dbo' +<.a) +>-.a +>+.a]
+  ...
+```
+
+This eliminates the need for fragile `?:  =(+<.a '.')` disambiguation
+and ensures a single source of truth for the parsing patterns.
+
 ## Resources
 
 - [Parsing Guide](https://developers.urbit.org/guides/core/hoon-school/J-stdlib-text) - Hoon School parsing

@@ -804,7 +804,102 @@ Hoon has limited dependent types:
   items
 ```
 
-## 10. Common Type Patterns
+## 10. Working with `*`-Typed Nouns
+
+Code that processes untyped nouns (e.g., `|=  parsed=*` in cook functions,
+vase payloads, or poke data) requires specific patterns to cast back into
+typed values. The three casting mechanisms behave very differently with `*`.
+
+### Casting Mechanisms
+
+#### `^-` / backtick — Compile-Time Assertion
+`` `@tas`value `` is sugar for `^-(@ value)`. It checks at **compile time**
+that the value's type nests in the target type. Fails with nest-fail when
+the value is `*`, because `*` doesn't nest in any specific type:
+
+```hoon
+|=  parsed=*
+`@tas`parsed        ::  nest-fail: -have.* -need.@tas
+
+::  Also fails for structured types:
+`qualified-column:ast`parsed  ::  nest-fail
+```
+
+**Use when**: the compiler already knows the value has a compatible type.
+
+#### `;;` (micmic) — Runtime Normalization
+`;;(type value)` validates the noun structure at **runtime** and produces a
+typed result. Crashes if the noun doesn't match:
+
+```hoon
+|=  parsed=*
+;;(@tas parsed)                 ::  ✓ works if parsed is an atom
+;;(qualified-column:ast parsed) ::  ✓ works if structure matches
+```
+
+**Use when**: you have a `*`-typed noun and need a fully typed value.
+Appropriate for complex structured types.
+
+#### Extract + Narrow with `?=`
+For extracting fields from a `*`-typed noun, extract the field into a face,
+then narrow it with `?=` or `?>`:
+
+```hoon
+|=  parsed=*
+?:  ?=([%my-tag *] parsed)
+  =/  name  +>-.parsed       ::  type is still *
+  ?>  ?=(@ name)             ::  narrows to @
+  [%result name=name]        ::  @ nests freely in @tas, @t, etc.
+...
+```
+
+**Use when**: you need specific fields from a partially-typed noun.
+After `?=(@ x)`, the atom `x` nests freely into any aura (`@tas`, `@t`,
+`@ud`, etc.) — Hoon is permissive with atom aura nesting.
+
+### `?=` Type Narrowing on `*`
+
+`?=` checks structure and produces a loobean (`?`), but inner `*` stays `*`:
+
+```hoon
+|=  parsed=*
+?:  ?=([%my-tag *] parsed)
+  ::  HERE: parsed is [%my-tag *]
+  ::  -.parsed is %my-tag (narrowed)
+  ::  +.parsed is still * (NOT narrowed)
+  `@tas`+.parsed             ::  nest-fail! still *
+  ...
+```
+
+**Fix**: extract and narrow inner fields separately:
+```hoon
+?:  ?=([%my-tag *] parsed)
+  =/  val  +.parsed
+  ?>  ?=(@ val)              ::  now val is @
+  val                        ::  nests in @tas, @t, etc.
+```
+
+### `?=` Cannot Match Specific Values Deep in `*`
+
+You **cannot** put specific atom values in nested positions of a `?=`
+pattern when the subject is `*`:
+
+```hoon
+|=  parsed=*
+::  FAILS: nest-fail -have.* -need.?(%.y %.n)
+?:  ?=([%tag [%inner 'specific-value' @ *] *] parsed)
+  ...
+```
+
+**Fix**: check structure first, then use `=` for value checks:
+```hoon
+?:  ?=([%tag [%inner *] *] parsed)
+  ?:  =('specific-value' +<+<.parsed)
+    ::  matched
+  ...
+```
+
+## 11. Common Type Patterns
 
 ### Pattern 1: Optional Value
 ```hoon
@@ -871,7 +966,7 @@ Hoon has limited dependent types:
   ...
 ```
 
-## 11. Debugging Type Errors
+## 12. Debugging Type Errors
 
 ### Strategy
 
@@ -923,7 +1018,7 @@ step-2
 **Problem**: `mint-vain`
 **Solution**: Remove unused value
 
-## 12. Best Practices
+## 13. Best Practices
 
 ### 1. Always Cast Function Returns
 ```hoon
