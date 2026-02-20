@@ -202,6 +202,15 @@ text                 ::  'abc'
 
 ::  Build cord from tapes
 (crip (weld "hello " "world"))  ::  'hello world'
+
+::  Dot syntax: adjacent tape literals separated by .
+::  Each literal except the last ends with a dot.
+::  Equivalent to weld but more readable for long strings.
+"hello "."world"              ::  "hello world"
+
+"INSERT INTO calendar ".      ::  multi-line form
+"VALUES ".                    ::  (each non-final line ends with .)
+"(~2023.12.21, 2023, 12)"     ::  final line has no dot
 ```
 
 ### Substrings
