@@ -135,6 +135,26 @@ echo '`@ud`value'  # backticks are literal, no escaping required
 
 This is especially relevant when writing Hoon to files for conn.c thread execution.
 
+### Face Names Shadow Molds
+
+Do not give gate arguments or local faces the same name as molds/types used in
+casts or return annotations. A face like `=data` shadows the `data` mold, so a
+nearby `^-  [data file]` may fail with `-find.$` or resolve differently than
+intended. Prefer value faces such as `cur-data=data`, `next-data=data`, or
+`acc-data=data` and keep mold names available for type syntax.
+
+```hoon
+::  WRONG: the face named data shadows the data mold.
+|=  =data
+^-  [data file]
+[data parent-file]
+
+::  RIGHT: face is distinct, mold remains available.
+|=  cur-data=data
+^-  [data file]
+[cur-data parent-file]
+```
+
 ## Debugging Type Errors
 
 ### Common Issues
