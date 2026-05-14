@@ -32,6 +32,7 @@ This command guides developers through creating comprehensive test suites that v
 4. **Clear Failures** - Easy to understand what broke
 5. **Comprehensive Coverage** - Test happy paths and edge cases
 6. **Maintainable Tests** - Easy to update as code evolves
+7. **Valid Hoon Dates** - When writing `@da` literals such as `~2034.12.5`, use real calendar month/day ranges. Never increment the month past 12; roll over to a valid later date such as `~2035.1.*`.
 
 ---
 
@@ -616,4 +617,3 @@ This command references:
 - **Clear failures** - Easy to identify failing test
 - **No flaky tests** - Deterministic results
 - **Maintained tests** - Updated with code changes
-
