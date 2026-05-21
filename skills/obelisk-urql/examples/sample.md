@@ -1,0 +1,336 @@
+# urQL examples
+
+```urQL
+CREATE DATABASE db1;
+```
+
+```urQL
+CREATE DATABASE db1 AS OF ~2023.7.9..22.35.35..7e90
+```
+
+```urQL
+CREATE NAMESPACE ns1 AS OF ~2023.7.9..22.35.35..7e90
+```
+
+```urQL
+ALTER DATABASE db1 RENAME TO db2;
+```
+
+```urQL
+CREATE NAMESPACE ns2;
+ALTER NAMESPACE ns2 TRANSFER TABLE my-table;
+```
+
+```urQL
+CREATE DATABASE db2;
+CREATE NAMESPACE db2.ns2;
+ALTER NAMESPACE db2.ns2 TRANSFER TABLE db1..my-table AS OF ~2026.5.1;
+```
+
+```urQL
+CREATE TABLE db1..my-table
+  (col1 @t, col2 @da, col3 @ud)
+  PRIMARY KEY (col1);
+```
+
+```urQL
+CREATE TABLE parent
+  (id @ud, label @t)
+  PRIMARY KEY (id);
+CREATE TABLE child
+  (id @ud, parent-id @ud, note @t)
+  PRIMARY KEY (id)
+  FOREIGN KEY (parent-id) REFERENCES parent (id);
+```
+
+```urQL
+CREATE TABLE tenant-codes
+  (tenant-id @ud, code @ud, label @t)
+  PRIMARY KEY (tenant-id, code);
+CREATE TABLE tenant-items
+  (id @ud, tenant-id @ud, code @ud, item @t)
+  PRIMARY KEY (id)
+  FOREIGN KEY (tenant-id, code)
+    REFERENCES tenant-codes (tenant-id, code)
+    ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+```urQL
+ALTER TABLE my-table RENAME TO renamed-table;
+```
+
+```urQL
+ALTER TABLE my-table COLUMNS (col3, col1, col2);
+```
+
+```urQL
+ALTER TABLE my-table PRIMARY KEY (col1, col3);
+```
+
+```urQL
+ALTER TABLE my-table
+  ADD COLUMN (created @da, balance @sd, ratio @rd),
+  COLUMNS (col1, col2, col3, created, balance, ratio);
+```
+
+```urQL
+ALTER TABLE my-table
+  DROP COLUMN (old-note),
+  RENAME COLUMN (col1 TO name),
+  ALTER COLUMN (col3 @sd),
+  COLUMNS (name, col2, col3);
+```
+
+```urQL
+ALTER TABLE my-table
+  RENAME TO full-table,
+  ADD COLUMN (created @da),
+  DROP COLUMN (col2),
+  RENAME COLUMN (col1 TO name),
+  ALTER COLUMN (col3 @sd),
+  COLUMNS (name, col3, created),
+  PRIMARY KEY (name, col3)
+  AS OF ~2026.5.1;
+```
+
+```urQL
+ALTER TABLE child
+  ADD FOREIGN KEY (parent-id) REFERENCES parent (id)
+  ON DELETE RESTRICT ON UPDATE CASCADE;
+```
+
+```urQL
+ALTER TABLE child
+  DROP FOREIGN KEY (parent-id) parent;
+```
+
+```urQL
+INSERT INTO calendar
+VALUES
+  (~2023.12.21, 2023, 12, 'December', 21, 'Thursday', 355, 5, 51)
+  (~2023.12.22, 2023, 12, 'December', 22, 'Friday', 356, 6, 51)
+  (~2023.12.23, 2023, 12, 'December', 23, 'Saturday', 357, 7, 51)
+  (~2023.12.24, 2023, 12, 'December', 24, 'Sunday', 358, 1, 52)
+  (~2023.12.25, 2023, 12, 'December', 25, 'Monday', 359, 2, 52);
+```
+
+```urQL
+INSERT INTO db1..my-table AS OF ~2000.1.2..12.12.12
+VALUES ('cord2', ~2000.1.2, 42);
+```
+
+```urQL
+DELETE FROM calendar AS OF ~2012.5.1
+WHERE day-name = 'Sunday'
+   OR day-name = 'Monday'
+   OR day-name = 'Tuesday'
+   OR day-name = 'Wednesday'
+   OR day-name = 'Thursday'
+   OR day-name = 'Friday'
+   OR (day-name = 'Saturday'
+       AND day-of-year = 357);
+```
+
+```urQL
+UPDATE my-table-2
+SET col3=99
+WHERE col1 = 'today';
+```
+
+```urQL
+UPDATE my-table-2
+SET col3=DEFAULT;
+```
+
+```urQL
+TRUNCATE TABLE my-table;
+```
+
+```urQL
+DROP TABLE my-table-1;
+```
+
+```urQL
+DROP TABLE FORCE my-table-2;
+```
+
+```urQL
+SELECT 0;
+```
+
+```urQL
+SELECT ~2024.10.20, 'hello' AS Greeting, 42 AS Answer;
+```
+
+```urQL
+FROM sys.tables
+SELECT ~2024.10.20, tmsp AS Time, ~sampel-palnet AS Home;
+```
+
+```urQL
+FROM my-table AS OF ~2000.1.3
+SELECT *;
+```
+
+```urQL
+FROM renamed-table
+SELECT *;
+```
+
+```urQL
+FROM my-table AS OF ~2026.4.30
+SELECT *;
+```
+
+```urQL
+FROM adoptions A
+SCALARS full-label CONCAT(name, ' (', species, ')')
+        fee-tier IF adoption-fee > 75 THEN 'premium' ELSE 'standard' ENDIF
+SELECT name, species, adoption-date, full-label, fee-tier;
+```
+
+```urQL
+FROM calendar T1
+JOIN holiday-calendar T2
+SELECT T1.day-name, T2.*;
+```
+
+```urQL
+FROM calendar T1
+JOIN holiday-calendar T2
+WHERE T1.date BETWEEN ~2025.1.1 AND ~2025.12.31
+SELECT T1.date, day-name, us-federal-holiday;
+```
+
+```urQL
+FROM adoptions A
+JOIN vaccinations V ON A.name = V.name AND A.species = V.species
+SELECT A.name, A.species, A.adoption-date, V.vaccine, V.vaccination-time;
+```
+
+```urQL
+FROM adoptions A
+CROSS JOIN vaccinations V
+WHERE A.name = V.name
+  AND A.species = V.species
+  AND V.vaccination-time > A.adoption-date
+SELECT A.name, A.species, A.adoption-date, V.vaccine, V.vaccination-time;
+```
+
+```urQL
+FROM calendar T1
+JOIN holiday-calendar T2
+JOIN tbl3 T3
+SELECT row-name, T1.day-name, T2.*, T3.*;
+```
+
+```urQL
+FROM tbl1
+CROSS JOIN cross-tbl
+SELECT year, month, day, month-name, cross-key, cross-2, cross-3;
+```
+
+```urQL
+FROM tbl1
+CROSS JOIN cross-tbl AS OF ~2000.1.3
+SELECT year, month, day, month-name, cross-key, cross-2, cross-3;
+```
+
+```urQL
+WITH (FROM persons P
+      JOIN staff S
+      SELECT P.first-name, P.last-name, P.email, S.hire-date) AS shelter-staff
+FROM shelter-staff
+WHERE hire-date > ~2018.1.1
+SELECT first-name, last-name, hire-date;
+```
+
+```urQL
+WITH (FROM adoptions
+      WHERE species = 'Dog'
+      SELECT name, adopter-email, adoption-fee) AS dog-adoptions,
+     (FROM dog-adoptions
+      WHERE adoption-fee > 75
+      SELECT name, adopter-email) AS premium-dogs
+FROM premium-dogs
+SELECT *;
+```
+
+```urQL
+WITH (FROM calendar T1
+      JOIN holiday-calendar T2
+      WHERE T1.day-name = 'Monday'
+        AND T2.us-federal-holiday = 'Christmas Day'
+      SELECT T1.day-name, T2.*, T2.us-federal-holiday AS Fed)
+      AS My-Cte
+FROM My-Cte SELECT *;
+```
+
+```urQL
+FROM animals
+WHERE species = 'Dog'
+SELECT name, species
+UNION
+FROM animals
+WHERE species = 'Rabbit'
+SELECT name, species
+EXCEPT
+FROM adoptions
+SELECT name, species;
+```
+
+```urQL
+FROM adoptions
+SELECT name, species
+INTERSECT
+FROM vaccinations
+SELECT name, species;
+```
+
+```urQL
+FROM animals
+SELECT name, species
+EXCEPT
+FROM adoptions
+SELECT name, species;
+```
+
+```urQL
+WITH (FROM adoptions
+      SELECT name, species
+      INTERSECT
+      FROM vaccinations
+      SELECT name, species) AS adopted-and-vaccinated
+FROM adopted-and-vaccinated
+SELECT *;
+```
+
+```urQL
+WITH (FROM staff-assignments
+      WHERE role = 'Veterinarian'
+      SELECT email) AS vets
+FROM vets
+SELECT email
+UNION
+FROM staff-assignments
+WHERE role = 'Manager'
+SELECT email;
+```
+
+```urQL
+FROM sys.columns
+WHERE name = 'my-table'
+SELECT col-name, col-type;
+```
+
+```urQL
+FROM sys.table-keys
+WHERE name = 'calendar'
+SELECT name AS Table-Name, key-ordinal, key;
+```
+
+```urQL
+FROM sys.foreign-keys
+SELECT parent-namespace, parent-table, child-namespace, child-table,
+       ordinal, parent-column, child-column, on-delete, on-update;
+```
