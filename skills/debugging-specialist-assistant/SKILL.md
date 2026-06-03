@@ -40,6 +40,54 @@ dojo: hoon expression failed
 (scot %ud num)  ::  Produces @t (tape)
 ```
 
+#### nest-fail with `*`-Typed Nouns
+```
+nest-fail
+-have.*
+-need.?(%.y %.n)
+```
+**Cause**: Using specific atom values in nested positions of a `?=` pattern
+when the subject is `*`-typed (e.g., `|=  parsed=*`).
+
+**Example**:
+```hoon
+|=  parsed=*
+::  FAILS: compiler can't resolve ?= to a loobean against *
+?:  ?=([%tag [%inner 'specific' @ *] *] parsed)
+  ...
+```
+
+**Fix**: check structure with `?=` first, then use `=` for value checks:
+```hoon
+?:  ?=([%tag [%inner *] *] parsed)
+  ?:  =('specific' +<+<.parsed)
+    ...
+```
+
+---
+
+```
+nest-fail
+-have.[%my-tag name=* alias=%~]
+-need.some-type
+```
+**Cause**: After `?=([%my-tag *] parsed)`, the inner fields are still `*`.
+Using `` `@tas`+>-.parsed `` (backtick cast) fails because `*` doesn't nest
+in `@tas`.
+
+**Fix**: extract the field and narrow with `?=`:
+```hoon
+?:  ?=([%my-tag *] parsed)
+  =/  val  +>-.parsed
+  ?>  ?=(@ val)        ::  narrows * to @, which nests in @tas
+  [%result name=val]   ::  ✓ compiles
+```
+
+Alternatively, use `;;` for runtime normalization of the whole structure:
+```hoon
+;;(my-type:ast parsed)
+```
+
 #### find-fork (Incomplete Pattern Match)
 ```
 find-fork
