@@ -30,6 +30,27 @@ Concise syntax reference for core Hoon patterns and common operations.
 
 **Gotcha**: Irregular forms are preferred for readability but compile identically.
 
+### Bracket and Paren Irregular Forms
+
+`[]` tuple syntax and `()` gate-call syntax are single-line irregular forms.
+When an expression needs to contain tall-form runes, use tall form for the
+containing cell or gate call too.
+
+```hoon
+::  CORRECT: all on one line
+=/  foo  [(heading i.selected name.i.selected) 42]
+
+::  WRONG: [] cannot contain a multi-line tall-form expression
+=/  foo  [(heading i.selected name.i.selected)
+            (%-  selected-cte-dime  [i.selected named-ctes])]
+
+::  CORRECT: use tall cell construction when an item needs tall form
+=/  foo
+  :-  (heading i.selected name.i.selected)
+  %-  selected-cte-dime
+  [i.selected named-ctes]
+```
+
 ## Core Data Types
 
 ### Atoms (unsigned integers with auras)
@@ -130,6 +151,7 @@ If you forget the final `==`, the parser often reports a syntax error at the nex
   %foo  foo-value
   %bar  bar-value
 ==
+```
 
 ## Lists
 
@@ -195,6 +217,16 @@ This applies to any list-typed expression, including faces on cores:
 =/  cell  [1 2]
 =/  [a b]  cell    ::  Destructure into faces
 (add a b)          ::  → 3
+```
+
+### Bunting for Defaults
+
+`*` produces the bunt, or default value, for a mold. This is the usual way to
+initialize empty containers and typed zero values.
+
+```hoon
+=/  users  *(map @ud user)
+=/  count  *@ud
 ```
 
 ## Gotchas
@@ -272,6 +304,6 @@ This applies any time you want to access a wing (`+`, `-`, `p`, `q`, a face name
 
 ## Resources
 
-- [Hoon Rune Reference](https://developers.urbit.org/reference/hoon/rune)
-- [Hoon Standard Library](https://developers.urbit.org/reference/hoon/stdlib)
-- [Type System Documentation](https://developers.urbit.org/reference/hoon/hoon-school/types)
+- [Hoon Rune Reference](https://docs.urbit.org/hoon/rune)
+- [Hoon Standard Library](https://docs.urbit.org/hoon/stdlib)
+- [Molds (Types)](https://docs.urbit.org/build-on-urbit/hoon-school/e-types)

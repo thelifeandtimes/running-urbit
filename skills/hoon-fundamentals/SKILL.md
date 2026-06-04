@@ -347,6 +347,6 @@ Every Hoon program:
 ## Resources
 
 - [Hoon School](https://developers.urbit.org/guides/core/hoon-school)
-- [Subject-Oriented Programming](https://docs.urbit.org/language/hoon/reference/concepts#subject-oriented-programming)
-- [Noun Documentation](https://docs.urbit.org/language/hoon/reference/nouns)
-- [Nock Specification](https://docs.urbit.org/language/nock/reference/specification)
+- [Subject-Oriented Programming](https://docs.urbit.org/build-on-urbit/hoon-school/o-subject)
+- [Noun Documentation](https://docs.urbit.org/build-on-urbit/hoon-school/b-syntax)
+- [Nock Specification](https://docs.urbit.org/nock/specification)

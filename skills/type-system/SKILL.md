@@ -608,6 +608,35 @@ Hoon infers types in many contexts:
 ((|=  a=@  [a a]) 'hello')  ::  ['hello' 'hello'] - type @ (loses @t)
 ```
 
+### Constraining Wet Gates with `bake`
+
+`bake` (stdlib 2b, list logic) converts a **wet gate into a dry gate** by
+fixing the sample to a mold. Use it to hand a polymorphic gate to tools that
+require a dry gate with a known input type.
+
+```hoon
+++  bake
+  |*  [a=gate b=mold]
+  |=  c=b
+  (a c)
+```
+
+- `a` (`gate`): the wet gate to wrap
+- `b` (`mold`): the type the resulting dry gate's sample is constrained to
+- product: a dry gate whose input nests in `b`
+
+```hoon
+=wet-gate  |*(a=* [a a])
+(wet-gate 42)              ::  [42 42] - polymorphic, no constraint
+
+=dry-gate  (bake wet-gate @ud)
+(dry-gate 42)             ::  [42 42]
+(dry-gate ['foo' 'bar'])  ::  nest-fail: -need.@ud -have.[@t @t]
+```
+
+The wrapped gate now enforces the mold: arguments that don't nest in `b`
+fail with `nest-fail`.
+
 ### Mold Builders (`|$`)
 
 Create parameterized types:
@@ -1101,10 +1130,10 @@ step-2
 
 ## Resources
 
-- [Type System Reference](https://docs.urbit.org/language/hoon/reference/type) - Official docs
-- [Aura List](https://docs.urbit.org/language/hoon/reference/auras) - All auras
-- [Mold Reference](https://docs.urbit.org/language/hoon/reference/mold) - Mold patterns
-- [Advanced Types](https://docs.urbit.org/language/hoon/guides/advanced) - Advanced patterns
+- [Basic Types](https://docs.urbit.org/hoon/basic) - The `$type` structure and inference (type system reference)
+- [Auras](https://docs.urbit.org/hoon/auras) - All auras
+- [Molds (Types)](https://docs.urbit.org/build-on-urbit/hoon-school/e-types) - Molds, type-checking, nesting, variance
+- [Advanced Types](https://docs.urbit.org/hoon/advanced) - Polymorphism, wet gates, variance models
 
 ## Summary
 

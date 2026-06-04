@@ -626,9 +626,9 @@ text                 ::  'abc'
 
 ## Resources
 
-- [String Reference](https://docs.urbit.org/language/hoon/reference/stdlib/4b) - Cord/tape functions
-- [Parsing Guide](https://docs.urbit.org/language/hoon/guides/parsing) - Text parsing
-- [Formatting](https://docs.urbit.org/language/hoon/reference/stdlib/4j) - Number formatting
+- [Text Processing](https://docs.urbit.org/hoon/stdlib/4b) - Cord/tape functions
+- [Text Processing III (Parsing)](https://docs.urbit.org/build-on-urbit/hoon-school/q2-parsing) - Text parsing
+- [Formatting Functions](https://docs.urbit.org/hoon/stdlib/4m) - Number formatting
 
 ## Summary
 

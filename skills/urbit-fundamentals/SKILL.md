@@ -81,7 +81,7 @@ Everything in Nock is a **noun**:
 
 ### Reference
 
-- Official Nock specification: https://docs.urbit.org/language/nock/reference/specification
+- Official Nock specification: https://docs.urbit.org/nock/specification
 - Nock definition: https://urbit.org/docs/glossary/nock
 
 ## 3. Hoon: The Language
@@ -116,7 +116,7 @@ Result
 
 ### Reference
 
-- Hoon language documentation: https://docs.urbit.org/language/hoon
+- Hoon language documentation: https://docs.urbit.org/build-on-urbit/hoon-school
 - Hoon School (tutorial): https://docs.urbit.org/courses/hoon-school
 
 ## 4. Arvo: The Operating System

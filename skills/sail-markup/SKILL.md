@@ -560,7 +560,7 @@ Sail (stylized as "~[]") is Hoon's embedded HTML templating language, allowing y
 
 - [Sail Guide](https://developers.urbit.org/guides/additional/dist/sail) - Official Sail documentation
 - [HTTP Guide](https://developers.urbit.org/guides/core/app-school/8-http) - Sail with Gall
-- [Manx Reference](https://docs.urbit.org/language/hoon/reference/stdlib/5e) - Sail types
+- [Sail (HTML)](https://docs.urbit.org/hoon/sail) - Sail types
 
 ## Summary
 

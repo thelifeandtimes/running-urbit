@@ -9,298 +9,90 @@ checked-by: ~sarlev-sarsen
 
 # Hoon Expert Assistant
 
-Provides expert guidance for writing idiomatic, type-safe, and performant Hoon code following community best practices.
+Coordinating expert skill for nontrivial Hoon work. Tells you *how to operate*:
+inspect local code first, classify the task, delegate to specialized Hoon
+skills, apply senior Hoon engineering judgment, make conservative edits, and
+verify. This is a router and a judgment layer — not a reference manual.
 
-## Core Competencies
+## Use This Skill For
 
-### Functional Programming
-- Pure functional paradigm: immutability, referential transparency
-- Higher-order functions: gates, cores, functional abstractions
-- Recursion patterns: tail recursion, mutual recursion
-- Type-driven development using molds and type system
+- Nontrivial Hoon implementation where design choices matter.
+- Refactoring Hoon while preserving observable behavior.
+- Debugging when the error crosses syntax / type / runtime boundaries.
+- Choosing between competing Hoon design approaches.
+- Reviewing Hoon for correctness and maintainability.
 
-### Subject-Oriented Programming
-- Subject manipulation and transformation
-- Context management with wings, faces, and limbs
-- Core construction and door patterns
-- Subject-based scoping and resolution
+## Do Not Use This As
 
-### Rune Expertise
-**Core construction**: `|%`, `|_`, `|^`, `|*` (cores, doors, trap cores, wet gates)
-**Conditionals**: `?:`, `?-`, `?+`, `?~` (if-then-else, switch, default switch, null check)
-**Recursion**: `|-`, `|.` (trap, gate)
-**Composition**: `;:`, `=<`, `=>`, `=;` (function chaining and composition)
-**Type manipulation**: `^-`, `^+`, `^*`, `^~` (casts, type inference)
-**Advanced patterns**: wet gates (`|*`), kelvin versioning, metaprogramming
+- A rune reference → `hoon-basics`.
+- A type-system manual → `type-system`.
+- A data-structure API reference → `data-structures`.
+- A Gall app workflow guide → `app-development-workflow`.
 
-### Type System
-- Aura system: `@`, `@p`, `@t`, `@ud`, `@ux` and custom auras
-- Molds: validation, normalization, type construction
-- Vases: type-value pairs for dynamic typing
-- Type inference and variance
-- Generic programming with wet gates
+## Operating Workflow
 
-### Standard Library
-- **Core utilities**: `++turn`, `++roll`, `++snap`, `++flop`, `++weld`
-- **Data structures**: sets (`++in`), maps (`++by`), jugs, mops
-- **Text processing**: tapes, cords, knots, formatting (`++scot`, `++scow`)
-- **Parsing**: parser combinators, `++so`, `++ne`, custom parsers
-- **Cryptography**: hashing, encryption, signature verification
-- **JSON**: `++enjs`, `++dejs`, custom encoders/decoders
+1. **Read first.** Open the target file and its nearby imports (`/-`, `/+`,
+   `/=`, `=<` faces). Never edit code you have not read in context.
+2. **Locate context.** Identify the desk and whether you are in an
+   app/agent, lib, sur, gen, mar, or ted file. Conventions differ by role.
+3. **Classify the task.** Pick the dominant axis: syntax, type-system,
+   data-structure, Gall, migration, testing, style, or domain logic. Most
+   real tasks have one primary axis plus one or two secondary ones.
+4. **Load companion skill(s)** for the classified axes (see routing below).
+   Load before deciding, not after a guess fails.
+5. **Reuse before inventing.** Prefer existing project molds, arms, doors,
+   marks, and helper libraries over new ones.
+6. **Make the smallest coherent change** that solves the problem.
+7. **Verify** with the smallest available compile/test path.
 
-### Gall Agent Development
-- **Lifecycle**: `++on-init`, `++on-save`, `++on-load`
-- **State management**: versioned state, migration patterns
-- **Subscription model**: `++on-watch`, `++on-leave`, `++on-agent`
-- **Poke handling**: `++on-poke`, action processing
-- **Effects and cards**: HTTP requests, subscriptions, scries
-- **Error handling and recovery**
+## Companion Skill Routing
 
-## Common Patterns
+| Axis / signal | Load |
+|---|---|
+| Rune forms, syntax, parser gotchas, number/literal formatting | `hoon-basics` |
+| Molds, casts, auras, variance, `nest-fail`, `*`-typed nouns | `type-system` |
+| Lists, sets, maps, mops, jars, jugs — APIs & performance | `data-structures` |
+| Compiler/runtime errors, `fish-loop`, stack traces, root cause | `debugging-specialist-assistant` |
+| Formatting, naming, documentation conventions | `hoon-style-guide` |
+| Test design, generators, TDD | `hoon-test-workflow` |
+| Gall agents, desks, fake ships, app packaging | `app-development-workflow` |
+| Gall state versioning & upgrades | `hoon-migrate-workflow` |
+| Obelisk urQL / SQL or `%obelisk` agent behavior | `obelisk-urql` |
 
-### Type-Safe Casting
-```hoon
-::  Explicit cast with clear error messages
-=/  num=@ud  (slay %ud (scot %ud input))
-^-  @ud  num
-```
+When in doubt, route. A two-minute companion-skill load beats a wrong edit.
 
-### List Processing
-```hoon
-::  Efficient single-pass composition
-=/  result
-  %+  turn
-    %+  skim  data
-      |=(item ~(has in lookup set))
-    process
-  sort-with
-```
+## Expert Hoon Heuristics
 
-### Gate Definition
-```hoon
-::  Idiomatic gate with explicit types
-++  process-input
-  |=(input *)
-  ^-  output
-  =/  intermediate  (transform input)
-  (finalize intermediate)
-```
+- Normalize untyped or `*` input at boundaries; do not carry `*` through core
+  logic. Cast to a real mold as early as possible.
+- Put explicit return molds (`^-`) on public arms and any nontrivial gate.
+- Bind ambiguous deep wings to typed intermediates instead of repeating long
+  wing paths.
+- Prefer tagged unions (`$%`) for action, state, and message variants.
+- Prefer stdlib container doors (`by`, `in`, `to`, `mo`, `si`) over hand-rolled
+  traversal.
+- Choose data structures by access pattern, not by habit.
+- Use `unit` for expected absence; reserve crashes for invariant violations.
+- Wrap intentional crash boundaries with `~|` traces so failures are legible.
+- Avoid wet gates unless they remove real duplication and you understand the
+  resulting type behavior.
+- Keep Gall state versioned and migrations explicit.
+- Avoid broad rewrites when a narrow change solves the problem.
 
-### Core with Battery
-```hoon
-::  Production-ready core pattern
-|%
-++  method-a
-  |=(input *)
-  ^-  output
-  (internal-computation input)
---
-```
+## Implementation Guardrails
 
-## Critical Syntax Pitfalls
+- Do not invent APIs before checking imports and neighboring code.
+- Do not change state molds without a migration plan.
+- Do not hand-roll parsers or containers when stdlib/project helpers exist.
+- Do not trust abstract examples over locally compiling patterns.
+- Do not silently swallow crashes that signal invariant corruption.
 
-### Number Formatting
+## Verification Checklist
 
-Hoon requires dot-separated groups of three digits for any number over 999:
-
-```hoon
-::  CORRECT
-1.000
-844.494
-1.000.000
-
-::  WRONG — parser error with no helpful message
-1000      ::  Error: {1 4}
-844494    ::  Error: {1 6}
-1000000   ::  Error: {1 7}
-```
-
-The error message (e.g. `{1 52}`) gives only a line/column position with no mention of number formatting. This is one of the most common sources of hard-to-diagnose Hoon errors.
-
-### Backtick Escaping from Python
-
-When generating Hoon code from Python, backtick (`` ` ``) characters conflict with string formatting and f-strings. Use `\x60` as the Python-safe escape:
-
-```python
-# Python: generating a Hoon type cast
-hoon_code = f"\x60@ud\x60value"  # produces `@ud`value
-```
-
-In bash, single-quoted strings pass backticks through safely — no escaping needed:
-
-```bash
-# Bash: single-quoted strings are safe
-echo '`@ud`value'  # backticks are literal, no escaping required
-```
-
-This is especially relevant when writing Hoon to files for conn.c thread execution.
-
-### Face Names Shadow Molds
-
-Do not give gate arguments or local faces the same name as molds/types used in
-casts or return annotations. A face like `=data` shadows the `data` mold, so a
-nearby `^-  [data file]` may fail with `-find.$` or resolve differently than
-intended. Prefer value faces such as `cur-data=data`, `next-data=data`, or
-`acc-data=data` and keep mold names available for type syntax.
-
-```hoon
-::  WRONG: the face named data shadows the data mold.
-|=  =data
-^-  [data file]
-[data parent-file]
-
-::  RIGHT: face is distinct, mold remains available.
-|=  cur-data=data
-^-  [data file]
-[cur-data parent-file]
-```
-
-## Debugging Type Errors
-
-### Common Issues
-
-**1. Missing type cast**
-```hoon
-::  Error: nest-fail
-=/  num  5
-^-  @t  num  ::  @ud doesn't nest in @t
-
-::  Fix: Use conversion function
-=/  num  5
-(scot %ud num)  ::  Produces @t
-```
-
-**2. Mold mismatch**
-```hoon
-::  Error: Incorrect structure
-+$  person  [name=@t age=@ud]
-=/  data  [name='alice' height=170]
-
-::  Fix: Match mold exactly
-=/  data  [name='alice' age=30]
-```
-
-**3. Face name mismatch**
-```hoon
-::  Error: Wrong face names
-+$  coord  [x=@ud y=@ud]
-=/  point  [a=5 b=10]
-
-::  Fix: Use correct faces
-=/  point  [x=5 y=10]
-```
-
-## Performance Optimization
-
-### Anti-Patterns to Avoid
-
-**Repeated traversals**
-```hoon
-::  Slow: three separate traversals
-=/  filtered  (skim data predicate)
-=/  mapped  (turn filtered process)
-=/  sorted  (sort mapped comparator)
-
-::  Fast: single composed pass
-=/  result
-  %+  sort
-    %+  turn
-      (skim data predicate)
-    process
-  comparator
-```
-
-**O(n²) nested loops**
-```hoon
-::  Slow: nested linear search
-=/  matches
-  %+  turn  list-a
-  |=  item-a=*
-  %+  skim  list-b
-  |=(item-b=* =(id.item-a id.item-b))
-
-::  Fast: use set for O(1) lookup
-=/  set-b  (~(gas in *(set @ud)) (turn list-b |=(item id.item)))
-=/  matches
-  %+  skim  list-a
-  |=(item (~(has in set-b) id.item))
-```
-
-**Inefficient accumulation**
-```hoon
-::  Slow: weld is O(n) each iteration
-|-
-?~  items  result
-$(items t.items, result (weld result ~[i.items]))
-
-::  Fast: accumulate then reverse
-|-
-?~  items  (flop result)
-$(items t.items, result [i.items result])
-```
-
-### Use Jets When Possible
-```hoon
-::  Slow: manual recursion
-=/  sum
-  |-  ^-  @ud
-  ?~  nums  0
-  (add i.nums $(nums t.nums))
-
-::  Fast: jet-accelerated stdlib
-=/  sum  (roll nums add)
-```
-
-## Data Structure Selection
-
-Choose based on operation patterns:
-
-- **Lists**: sequential processing, small datasets
-- **Sets**: membership testing, uniqueness
-- **Maps**: key-value lookup
-- **Mops**: ordered data, range queries
-- **Trees**: hierarchical navigation, efficient updates
-
-## Gall Agent Patterns
-
-### State Versioning
-```hoon
-++  on-save
-  |=  =vase
-  ^-  +(new-state saved-vase)
-  (migrate-state v.u.saved-vase)
-```
-
-### Subscription Management
-```hoon
-++  on-watch
-  |=  path=path
-  ^-  +(new-state new-watches)
-  (add-watch path v.state v.watches)
-```
-
-### Poke Processing
-```hoon
-++  on-poke
-  |=  =poke:action
-  ^-  +(new-state [new-wires new-effects])
-  (process-action poke.poke v.state)
-```
-
-## Best Practices
-
-1. **Type Safety First**: Always use explicit type casts (`^-`)
-2. **Idiomatic Patterns**: Follow community conventions
-3. **Small Functions**: Prefer composable functions over monoliths
-4. **Error Handling**: Graceful failures, informative messages
-5. **Performance Awareness**: Choose appropriate data structures
-6. **Documentation**: Comment complex algorithms and non-obvious patterns
-7. **Testing**: Cover edge cases (null values, empty lists)
-
-## Resources
-
-- [Hoon Documentation](https://docs.urbit.org/hoon)
-- [Hoon School](https://developers.urbit.org/guides/core/hoon-school)
-- [Standard Library](https://docs.urbit.org/hoon/stdlib)
-- [Rune Reference](https://docs.urbit.org/hoon/rune)
-- [Urbit Examples](https://github.com/urbit/examples)
+- [ ] Relevant companion skill(s) loaded for the task's axes.
+- [ ] Existing local patterns followed (molds, arms, helpers, marks).
+- [ ] Types/molds checked at every boundary.
+- [ ] Smallest compile/test path run when one is available.
+- [ ] Edge cases considered: `~`, empty lists, missing map keys, bad marks,
+      failed casts, unauthorized pokes.
+- [ ] Final answer states what changed and what was *not* verified.

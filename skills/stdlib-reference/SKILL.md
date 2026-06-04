@@ -548,7 +548,7 @@ Many stdlib functions have **jets** (C implementations) for performance:
 
 ### Search Strategies
 
-1. **Browse stdlib docs**: https://docs.urbit.org/language/hoon/reference/stdlib
+1. **Browse stdlib docs**: https://docs.urbit.org/hoon/stdlib
 2. **Search in hoon.hoon**: `/sys/hoon.hoon`
 3. **Check section headers**: Look for `+|` comments
 4. **Ask in ~bitbet-bolbel/urbit-community**
@@ -591,9 +591,9 @@ Many stdlib functions have **jets** (C implementations) for performance:
 
 ## Resources
 
-- [Standard Library Reference](https://docs.urbit.org/language/hoon/reference/stdlib) - Full documentation
+- [Standard Library Reference](https://docs.urbit.org/hoon/stdlib) - Full documentation
 - [Stdlib Source](https://github.com/urbit/urbit/blob/master/pkg/arvo/sys/hoon.hoon) - Read the source
-- [Jets List](https://docs.urbit.org/language/hoon/reference/stdlib/jets) - Performance-critical functions
+- [Fast Hints and Jets](https://docs.urbit.org/nock/jetting) - Performance-critical functions
 
 ## Summary
 

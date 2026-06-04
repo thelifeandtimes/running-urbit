@@ -604,8 +604,8 @@ and ensures a single source of truth for the parsing patterns.
 ## Resources
 
 - [Parsing Guide](https://developers.urbit.org/guides/core/hoon-school/J-stdlib-text) - Hoon School parsing
-- [Parser Reference](https://docs.urbit.org/language/hoon/reference/stdlib/4f) - Standard library parsers
-- [Rule Builders](https://docs.urbit.org/language/hoon/reference/stdlib/4e) - Combinator reference
+- [Parsing (Rule-Builders)](https://docs.urbit.org/hoon/stdlib/4f) - Standard library parsers
+- [Parsing (Combinators)](https://docs.urbit.org/hoon/stdlib/4e) - Combinator reference
 
 ## Summary
 

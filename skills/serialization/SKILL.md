@@ -652,9 +652,9 @@ q.v  ::  Noun (value)
 
 ## Resources
 
-- [JSON Guide](https://docs.urbit.org/language/hoon/reference/stdlib/5d) - JSON functions
+- [JSON (zuse 2d)](https://docs.urbit.org/hoon/zuse/2d_1-5) - JSON functions
 - [Marks Guide](https://developers.urbit.org/guides/core/app-school/types) - Mark system
-- [Vases Reference](https://docs.urbit.org/language/hoon/reference/stdlib/5c) - Runtime types
+- [Vases](https://docs.urbit.org/hoon/vases) - Runtime types
 
 ## Summary
 
