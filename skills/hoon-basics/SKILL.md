@@ -51,6 +51,37 @@ containing cell or gate call too.
   [i.selected named-ctes]
 ```
 
+### Face Labels Cannot Directly Take Tall-Form Values
+
+Face-label syntax like `name=value` is only safe when `value` is a regular
+single-expression form. Do not put a tall-form rune immediately after `=`.
+
+```hoon
+::  WRONG: face label directly before tall list syntax
+:-  columns=~[col1 col2 col3]
+    values=:~  [value-type=%t value='foo']
+              [value-type=%tas value=%foo]
+              [value-type=%ta value=~.foo-bar]
+              ==
+```
+
+Factor the tall-form value out, or build the surrounding value without labels.
+
+```hoon
+::  CORRECT: bind the tall list first
+=/  vals
+  :~  [value-type=%t value='foo']
+      [value-type=%tas value=%foo]
+      [value-type=%ta value=~.foo-bar]
+      ==
+
+:-  columns=~[col1 col2 col3]
+    values=vals
+```
+
+This also applies to other tall runes after labels, such as `field=%-`,
+`field=:-`, or `field=:*`.
+
 ## Core Data Types
 
 ### Atoms (unsigned integers with auras)
