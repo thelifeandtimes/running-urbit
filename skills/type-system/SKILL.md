@@ -347,16 +347,50 @@ x.p  ::  5
 ```
 
 #### Recursive Type
+
 ```hoon
 +$  json
   $@  ~
   $%  [%s p=@t]
       [%n p=@ta]
       [%b p=?]
-      [%a p=(list json)]
-      [%o p=(map @t json)]
+      [%a p=(list json)]      :: recursion via stdlib `list`
+      [%o p=(map @t json)]    :: recursion via stdlib `map`
   ==
 ```
+
+**Rule.** A `+$` mold may only recur on itself when the self-reference passes through a polymorphic stdlib mold (`list`, `tree`, `map`, `set`, `unit`) or a user-defined `|*` / `|$` mold builder. Those builders are wet gates: their bodies are evaluated at call site, which defers — and thereby ties off — the recursion. Without that guard, the mold compiler has no fixed-point operator and cannot resolve the self-reference.
+
+**Does not compile — direct self-reference inside `+$`:**
+
+```hoon
++$  expr
+  $%  [%leaf x=@]
+      [%node left=expr right=expr]   :: ERROR: expr unresolved
+  ==
+```
+
+`$+` does not fix this. `$+` is face annotation for type display and equality, not a fixed-point marker.
+
+**Workarounds when you need a binary expression tree:**
+
+1. **Encode through `tree`** — pay structural-correctness in convention.
+   ```hoon
+   +$  expr        (tree expr-node)
+   +$  expr-node   $%([%leaf x=@] [%op =operator])
+   ```
+   `tree` is a binary noun shape; nothing in the mold prevents an `%op` node with no children or a `%leaf` with children. Evaluator must validate.
+
+2. **Flatten with precedence-tiered lists** — encodes precedence and associativity in the type itself.
+   ```hoon
+   +$  add-expr   (list add-term)             :: + / - chain, lowest precedence
+   +$  add-term   [op=add-op =mul-expr]
+   +$  mul-expr   (list mul-term)             :: * / / chain, higher precedence
+   +$  mul-term   [op=mul-op =atom-expr]
+   ```
+   Left-fold at runtime; no recursive evaluator needed; no malformed-tree class of bug.
+
+3. **Define a `|$` mold builder of your own** when the stdlib containers don't fit. Recursion lives in the builder, not in `+$`.
 
 #### Constrained Type
 ```hoon
@@ -573,6 +607,35 @@ Hoon infers types in many contexts:
 ((|=  a=@  [a a]) 42)       ::  [42 42] - type @ (generic atom)
 ((|=  a=@  [a a]) 'hello')  ::  ['hello' 'hello'] - type @ (loses @t)
 ```
+
+### Constraining Wet Gates with `bake`
+
+`bake` (stdlib 2b, list logic) converts a **wet gate into a dry gate** by
+fixing the sample to a mold. Use it to hand a polymorphic gate to tools that
+require a dry gate with a known input type.
+
+```hoon
+++  bake
+  |*  [a=gate b=mold]
+  |=  c=b
+  (a c)
+```
+
+- `a` (`gate`): the wet gate to wrap
+- `b` (`mold`): the type the resulting dry gate's sample is constrained to
+- product: a dry gate whose input nests in `b`
+
+```hoon
+=wet-gate  |*(a=* [a a])
+(wet-gate 42)              ::  [42 42] - polymorphic, no constraint
+
+=dry-gate  (bake wet-gate @ud)
+(dry-gate 42)             ::  [42 42]
+(dry-gate ['foo' 'bar'])  ::  nest-fail: -need.@ud -have.[@t @t]
+```
+
+The wrapped gate now enforces the mold: arguments that don't nest in `b`
+fail with `nest-fail`.
 
 ### Mold Builders (`|$`)
 
@@ -1067,10 +1130,10 @@ step-2
 
 ## Resources
 
-- [Type System Reference](https://docs.urbit.org/language/hoon/reference/type) - Official docs
-- [Aura List](https://docs.urbit.org/language/hoon/reference/auras) - All auras
-- [Mold Reference](https://docs.urbit.org/language/hoon/reference/mold) - Mold patterns
-- [Advanced Types](https://docs.urbit.org/language/hoon/guides/advanced) - Advanced patterns
+- [Basic Types](https://docs.urbit.org/hoon/basic) - The `$type` structure and inference (type system reference)
+- [Auras](https://docs.urbit.org/hoon/auras) - All auras
+- [Molds (Types)](https://docs.urbit.org/build-on-urbit/hoon-school/e-types) - Molds, type-checking, nesting, variance
+- [Advanced Types](https://docs.urbit.org/hoon/advanced) - Polymorphism, wet gates, variance models
 
 ## Summary
 

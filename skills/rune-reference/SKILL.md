@@ -1647,9 +1647,9 @@ $(x new-x)        ::  %=($ x new-x)
 
 ## Resources
 
-- [Rune Reference](https://docs.urbit.org/language/hoon/reference/rune) - Official documentation
+- [Rune Reference](https://docs.urbit.org/hoon/rune) - Official documentation
 - [Hoon School](https://developers.urbit.org/guides/core/hoon-school) - Rune tutorials
-- [Irregular Forms](https://docs.urbit.org/language/hoon/reference/irregular) - All irregular syntax
+- [Irregular Forms](https://docs.urbit.org/hoon/irregular) - All irregular syntax
 
 ## Summary
 

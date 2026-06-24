@@ -40,6 +40,54 @@ dojo: hoon expression failed
 (scot %ud num)  ::  Produces @t (tape)
 ```
 
+#### nest-fail with `*`-Typed Nouns
+```
+nest-fail
+-have.*
+-need.?(%.y %.n)
+```
+**Cause**: Using specific atom values in nested positions of a `?=` pattern
+when the subject is `*`-typed (e.g., `|=  parsed=*`).
+
+**Example**:
+```hoon
+|=  parsed=*
+::  FAILS: compiler can't resolve ?= to a loobean against *
+?:  ?=([%tag [%inner 'specific' @ *] *] parsed)
+  ...
+```
+
+**Fix**: check structure with `?=` first, then use `=` for value checks:
+```hoon
+?:  ?=([%tag [%inner *] *] parsed)
+  ?:  =('specific' +<+<.parsed)
+    ...
+```
+
+---
+
+```
+nest-fail
+-have.[%my-tag name=* alias=%~]
+-need.some-type
+```
+**Cause**: After `?=([%my-tag *] parsed)`, the inner fields are still `*`.
+Using `` `@tas`+>-.parsed `` (backtick cast) fails because `*` doesn't nest
+in `@tas`.
+
+**Fix**: extract the field and narrow with `?=`:
+```hoon
+?:  ?=([%my-tag *] parsed)
+  =/  val  +>-.parsed
+  ?>  ?=(@ val)        ::  narrows * to @, which nests in @tas
+  [%result name=val]   ::  ✓ compiles
+```
+
+Alternatively, use `;;` for runtime normalization of the whole structure:
+```hoon
+;;(my-type:ast parsed)
+```
+
 #### find-fork (Incomplete Pattern Match)
 ```
 find-fork
@@ -65,6 +113,34 @@ ford: %slim failed
     %num  (add 1 num)
     %txt  (crip txt)
   $(default-value)
+```
+
+#### fish-loop with recursive molds
+
+`?=` pattern matching can trigger `fish-loop` when used directly against
+recursive molds such as `tree`, `list`, and containers built on trees (`map`,
+`set`, etc.).
+
+**Fix**: when matching a union that contains a recursive mold, match the
+non-recursive branch first, or narrow by tag/outer structure before inspecting
+the recursive value.
+
+```hoon
+::  Wrong: may fish-loop on recursive predicate mold
++$  predicate     (tree predicate-component)
++$  predicate-or-dime
+  $:  %predicate-or-dime
+    when=$%(predicate dime)
+    then=dime
+    ==
+?:  ?=(predicate when-cwt)
+  do-foo
+do-kung-foo
+
+::  Fix: test the non-recursive union arm first
+?:  ?=(dime when-cwt)
+  do-kung-foo
+do-foo
 ```
 
 #### mint-vain (Unused Value)
@@ -281,6 +357,19 @@ Halts execution with trace if condition is false.
   (do-work input)
 ```
 
+### Trace Crash Sites
+
+Use `~|` around known crash points so the crash includes the relevant context.
+
+```hoon
+::  Weak: crash loses local context
+(potential-crash param)
+
+::  Better: trace includes the value that led to the crash
+~|  "failed at potential crash site {<param>}"
+    (potential-crash param)
+```
+
 ### Incremental Building
 ```hoon
 ::  Don't build all at once
@@ -342,7 +431,7 @@ Halts execution with trace if condition is false.
 
 ## Resources
 
-- [Hoon Error Reference](https://docs.urbit.org/hoon/errors)
-- [Gall Agent Debugging](https://docs.urbit.org/arvo/gall/guide)
-- [Dojo Commands](https://docs.urbit.org/using/dojo)
-- [Troubleshooting Guide](https://docs.urbit.org/hoon/troubleshooting)
+- [Hoon Errors](https://docs.urbit.org/hoon/hoon-errors)
+- [App School (Gall agents)](https://docs.urbit.org/build-on-urbit/app-school)
+- [Dojo Tools](https://docs.urbit.org/user-manual/os/dojo-tools)
+- [Testing Code (debugging strategies)](https://docs.urbit.org/build-on-urbit/hoon-school/i-testing)

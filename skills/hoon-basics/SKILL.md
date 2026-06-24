@@ -30,6 +30,58 @@ Concise syntax reference for core Hoon patterns and common operations.
 
 **Gotcha**: Irregular forms are preferred for readability but compile identically.
 
+### Bracket and Paren Irregular Forms
+
+`[]` tuple syntax and `()` gate-call syntax are single-line irregular forms.
+When an expression needs to contain tall-form runes, use tall form for the
+containing cell or gate call too.
+
+```hoon
+::  CORRECT: all on one line
+=/  foo  [(heading i.selected name.i.selected) 42]
+
+::  WRONG: [] cannot contain a multi-line tall-form expression
+=/  foo  [(heading i.selected name.i.selected)
+            (%-  selected-cte-dime  [i.selected named-ctes])]
+
+::  CORRECT: use tall cell construction when an item needs tall form
+=/  foo
+  :-  (heading i.selected name.i.selected)
+  %-  selected-cte-dime
+  [i.selected named-ctes]
+```
+
+### Face Labels Cannot Directly Take Tall-Form Values
+
+Face-label syntax like `name=value` is only safe when `value` is a regular
+single-expression form. Do not put a tall-form rune immediately after `=`.
+
+```hoon
+::  WRONG: face label directly before tall list syntax
+:-  columns=~[col1 col2 col3]
+    values=:~  [value-type=%t value='foo']
+              [value-type=%tas value=%foo]
+              [value-type=%ta value=~.foo-bar]
+              ==
+```
+
+Factor the tall-form value out, or build the surrounding value without labels.
+
+```hoon
+::  CORRECT: bind the tall list first
+=/  vals
+  :~  [value-type=%t value='foo']
+      [value-type=%tas value=%foo]
+      [value-type=%ta value=~.foo-bar]
+      ==
+
+:-  columns=~[col1 col2 col3]
+    values=vals
+```
+
+This also applies to other tall runes after labels, such as `field=%-`,
+`field=:-`, or `field=:*`.
+
 ## Core Data Types
 
 ### Atoms (unsigned integers with auras)
@@ -107,6 +159,31 @@ Conditional runes (`?:`, `?~`, `?@`, etc.) take exactly **one hoon expression** 
   (another-gate y)
 ```
 
+### Tall-Form `?+` / `?-` Must End With `==`
+
+Tall-form switch runes like `?+` and `?-` open a clause block that must be closed with `==`.
+
+If you forget the final `==`, the parser often reports a syntax error at the next arm (`++ foo`) or the next top-level form, which can make the real problem hard to spot.
+
+```hoon
+::  WRONG — missing final ==
+?+  -.result  ;/("")
+  %result-set
+    (print-result-export-set +.result)
+
+::  CORRECT
+?+  -.result  ;/("")
+  %result-set
+    (print-result-export-set +.result)
+==
+
+::  Another example
+?-  kind
+  %foo  foo-value
+  %bar  bar-value
+==
+```
+
 ## Lists
 
 ```hoon
@@ -173,6 +250,16 @@ This applies to any list-typed expression, including faces on cores:
 (add a b)          ::  → 3
 ```
 
+### Bunting for Defaults
+
+`*` produces the bunt, or default value, for a mold. This is the usual way to
+initialize empty containers and typed zero values.
+
+```hoon
+=/  users  *(map @ud user)
+=/  count  *@ud
+```
+
 ## Gotchas
 
 1. **Null is `~`** not `0` or `false` or `nil`
@@ -199,6 +286,16 @@ dime:;;(literal-value:ast datum)   ::  CORRECT
 ```
 
 This applies any time you want to access a wing (`+`, `-`, `p`, `q`, a face name, etc.) from the result of a gate call, cast, or other expression — always use `:` in that position.
+
+11. lark and wing notation on arm execution
+
+```hoon
+::  WRONG — syntax error: +. cannot follow an arm application ()
++.(apply-resolved-scalar (~(got by rs) sname) [%indexed-row key.row data.row])
+
+::  CORRECT — use colon : on parens () not dot .
++:(apply-resolved-scalar (~(got by rs) sname) [%indexed-row key.row data.row])
+```
 
 ## Fast Lookups
 
@@ -238,6 +335,6 @@ This applies any time you want to access a wing (`+`, `-`, `p`, `q`, a face name
 
 ## Resources
 
-- [Hoon Rune Reference](https://developers.urbit.org/reference/hoon/rune)
-- [Hoon Standard Library](https://developers.urbit.org/reference/hoon/stdlib)
-- [Type System Documentation](https://developers.urbit.org/reference/hoon/hoon-school/types)
+- [Hoon Rune Reference](https://docs.urbit.org/hoon/rune)
+- [Hoon Standard Library](https://docs.urbit.org/hoon/stdlib)
+- [Molds (Types)](https://docs.urbit.org/build-on-urbit/hoon-school/e-types)

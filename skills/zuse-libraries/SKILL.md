@@ -509,7 +509,7 @@ now                    ::  @da
 
 - [Zuse Source](https://github.com/urbit/urbit/blob/master/pkg/arvo/sys/zuse.hoon) - Full source code
 - [HTTP Guide](https://developers.urbit.org/guides/core/app-school/8-http) - HTTP in Gall
-- [Crypto Reference](https://docs.urbit.org/language/hoon/reference/stdlib/3d) - Cryptography functions
+- [SHA Hash Family](https://docs.urbit.org/hoon/stdlib/3d) - Cryptography functions
 
 ## Summary
 

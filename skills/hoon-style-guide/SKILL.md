@@ -9,7 +9,7 @@ checked-by: ~sarlev-sarsen
 
 # Hoon Style Guide Skill
 
-Comprehensive style guide for writing clean, idiomatic, and maintainable Hoon code following community conventions. Use when writing new code or reviewing code.
+Comprehensive style guide for writing clean, idiomatic, and maintainable Hoon code following desired conventions. Use when writing new code or reviewing code.
 
 ## Overview
 
@@ -23,6 +23,11 @@ This guide covers naming conventions, code organization, formatting, documentati
 4. Organize code into coherent structures
 5. Apply idiomatic Hoon patterns
 6. Avoid common anti-patterns
+
+Syntax and compiler-failure details belong in the companion skills:
+`hoon-basics` for parseability and rune usage, `type-system` for casts and
+molds, `data-structures` for container APIs, and
+`debugging-specialist-assistant` for compiler/runtime failures.
 
 ## 1. Naming Conventions
 
@@ -56,7 +61,7 @@ This guide covers naming conventions, code organization, formatting, documentati
 
 **maximum of 80 characters**:
 ```hoon
-::  ✓ Good: Wrap long lines
+::  ✓ Good: Wrap and properly indent long lines
 =/  very-long-computation
   %+  combine-results  %+  first-complex-operation  input-data
                                                     threshold
@@ -75,6 +80,7 @@ This guide covers naming conventions, code organization, formatting, documentati
 ~|  "resolve selected-cte-column: no rows in cte {<cte.selected>}"
     !!
 
+::  ✓ Good: continue message on next ling by adding dot after closing quote
 ~|  "resolve selected-cte-column: no rows in cte ".
     "and tape must be broken up into multiple lines {<cte.selected>}"
     !!
@@ -103,6 +109,14 @@ This guide covers naming conventions, code organization, formatting, documentati
 =/  sum  (add a b)
 =/  doubled  (mul n 2)
 ?:(=(x 0) 'zero' 'non-zero')
+
+::  ✓ Good
+=/  target-val  (apply-scalar data-row +.target-ps)
+
+::  ✗ Bad
+?:  condition
+=/  target-val  %+  apply-scalar  data-row
+                                  +.target-ps
 ```
 
 ### Tall Form Alignment
@@ -115,9 +129,8 @@ This guide covers naming conventions, code organization, formatting, documentati
 false-branch
 
 =/  value
-  %+  function
-    arg-1
-  arg-2
+  %+  function  arg-1
+                arg-2
 
 ::  ✗ Bad
 ?:  condition
@@ -125,37 +138,62 @@ true-branch
 false-branch
 ```
 
-**bracket [] and paren () format**
+### Tall Form Cell Alignment
 
-1. [] for tuple definition only works for single-line wide format
-2. () for arm dispatch only works for single-line wide format
-3. () format does not support runes inside
-
+align all cell items to the same column
 ```hoon
-::  ✓ Good: all on one line
-=/  foo  [(heading i.selected name.i.selected) 42]
+::  ✓ Good
+:+  %fn  type.expr
+          |=  =data-row
+          ^-  dime
+          ?-  number-system
+              ::
+              %rd  :-  number-system
+                      (~(abs rd:math [%z .~1e-15]) +:(f.expr data-row))
+              ::
+              %sd  [number-system (sun:si (abs:si +:(f.expr data-row)))]
+              ::
+              %ud  (f.expr data-row)
+              ==
 
-::  ✗ Bad: does not build
-=/  foo  [(heading i.selected name.i.selected)
-            (%-  selected-cte-dime  [i.selected named-ctes])]
+::  ✗ Bad
+:+  %fn
+  type.expr
+  |=  =data-row
+  ^-  dime
+  ?-  number-system
+      ::
+      %rd  :-  number-system
+                (~(abs rd:math [%z .~1e-15]) +:(f.expr data-row))
+      ::
+      %sd  [number-system (sun:si (abs:si +:(f.expr data-row)))]
+      ::
+      %ud  (f.expr data-row)
+      ==
 ```
+
+
+For syntax constraints on wide, tall, bracket, and paren forms, use
+`hoon-basics`. This section only covers readability preferences.
 
 ## 3. Comments and Documentation
 
 ### File Headers
 
+arm and core header blocks gap indented 
+
 **Document purpose and structure**:
 ```hoon
-::  User Management Library
-::
-::  Provides functions for creating, updating, and querying user data.
-::  Implements validation, password hashing, and role-based access.
-::
-::  Usage:
-::    =/  user  (create-user 'alice@example.com' 'password')
-::    =/  valid  (validate-credentials user credentials)
-::
 |%
+  ::  User Management Library
+  ::
+  ::  Provides functions for creating, updating, and querying user data.
+  ::  Implements validation, password hashing, and role-based access.
+  ::
+  ::  Usage:
+  ::    =/  user  (create-user 'alice@example.com' 'password')
+  ::    =/  valid  (validate-credentials user credentials)
+  ::
 ...
 --
 ```
@@ -163,7 +201,7 @@ false-branch
 ### Arm Documentation
 
 1. one empty comment line before ++ arm
-2. arm description comments immediately follow ++ indented by two spaces
+2. arm description comments gap indented
 
 **Describe purpose**:
 ```hoon
@@ -236,40 +274,22 @@ false-branch
 
 ## 5. Idiomatic Patterns
 
-### Pattern 1: Safe Operations
+### Pattern 1: Safe APIs
+
+Prefer APIs that make failure explicit when absence is expected. Return `unit`
+for lookups, parsing, and optional values; reserve crashes for invariant
+violations. For container-specific access rules, use `data-structures`.
+
+### Pattern 2: Standard Library Operations
 
 ```hoon
-::  ✓ Good: Return unit for fallible operations
-++  safe-head
-  |*  items=(list)
-  ^-  (unit _?>(?=(^ items) i.items))
-  ?~  items  ~
-  `i.items
+::  ✓ Good: use a clear stdlib traversal
+(turn items |=(n=@ud (mul n 2)))
 
-::  ✗ Bad: Crash on empty
-++  unsafe-head
-  |*  items=(list)
-  ?>  ?=(^ items)
-  i.items
-```
-
-### Pattern 2: Tail Recursion
-
-```hoon
-::  ✓ Good: Tail-recursive with accumulator
-++  sum-list
-  |=  items=(list @ud)
-  ^-  @ud
-  =/  acc  0
-  |-
-  ?~  items  acc
-  $(items t.items, acc (add i.items acc))
-
-::  ✗ Bad: Non-tail-recursive
-++  sum-list-slow
-  |=  items=(list @ud)
-  ?~  items  0
-  (add i.items $(items t.items))
+::  ✗ Bad: hand-rolled recursion for a simple map
+|-  ^-  (list @ud)
+?~  items  ~
+[(mul i.items 2) $(items t.items)]
 ```
 
 ### Pattern 3: Type Annotations
@@ -289,7 +309,8 @@ false-branch
 
 ### Pattern 4: Crash Handling
 
-1. use tracing printf hint to guard potential crashes with meaningful messages
+Crashes should include useful context. Use `~|` around known crash points, and
+put detailed debugging workflows in `debugging-specialist-assistant`.
 
 ```hoon
 ::  ✗ Bad: known danger of crash
@@ -298,6 +319,7 @@ false-branch
 ::  ✓ Good: guard with message including data
 ~|  "failed at potential crash site {<param>}"
     (potential-crash param)
+```
 
 ### Pattern 5: Default Values
 
@@ -338,46 +360,19 @@ false-branch
 
 ### Anti-Pattern 2: Inconsistent Naming
 
+All names below build; the anti-pattern is inconsistent vocabulary and
+word order, not illegal characters (for those, see §1).
+
 ```hoon
-::  ✗ Bad: Mixed conventions
-++  getUser      :: camelCase
-++  save-user    :: kebab-case
-++  Delete_User  :: snake_case with caps
-
-::  ✓ Good: Consistent
+::  ✗ Bad: mixed verbs and word order
 ++  get-user
-++  save-user
-++  delete-user
-```
+++  fetch-account   :: 'fetch' where 'get' is used elsewhere
+++  user-remove     :: noun-verb; the others are verb-noun
 
-### Anti-Pattern 2: fish-loop
-
-1. ?= pattern matching rune causes fish-loop on recursive mold types
-2. avoid ?= on tree, list, map
-3. when matching union types match on non-recursive type first
-
-:  ✗ Bad: will not build with fish-loop
-+$  predicate     (tree predicate-component)
-+$  predicate-or-dime
-  $:  %predicate-or-dime
-    when=$%(predicate dime)
-    then=dime
-    ==
-?:  ?=(predicate when-cwt)
-  do-foo
-do-kung-foo
-
-::  ✓ Good: Consistent
-+$  predicate     (tree predicate-component)
-+$  predicate-or-dime
-  $:  %predicate-or-dime
-    when=$%(predicate dime)
-    then=dime
-    ==
-+$
-?:  ?=(dime when-cwt)
-  do-kung-foo
-do-foo
+::  ✓ Good: one verb per action, consistent verb-noun order
+++  get-user
+++  get-account
+++  remove-user
 ```
 
 ## 7. Testing and Examples
@@ -429,15 +424,9 @@ do-foo
 
 ### Prefer Standard Library
 
-```hoon
-::  ✓ Good: Use jetted stdlib functions
-(turn items |=(n=@ud (mul n 2)))
-
-::  ✗ Bad: Reinvent recursion
-|-  ^-  (list @ud)
-?~  items  ~
-[(mul i.items 2) $(items t.items)]
-```
+Use jetted standard-library functions for common traversals and container
+operations. See `data-structures` for the concrete list, set, map, mop, jar,
+and jug APIs.
 
 ## 9. Hoon-Specific Conventions
 
@@ -455,6 +444,9 @@ do-foo
 ```
 
 ### Bunting for Defaults
+
+Use bunting for default initialization when the mold is clear. See
+`hoon-basics` and `type-system` for the mechanics of bunts.
 
 ```hoon
 ::  ✓ Good: Use * for defaults
@@ -480,4 +472,3 @@ name=value
 :-  b
 c
 ```
-

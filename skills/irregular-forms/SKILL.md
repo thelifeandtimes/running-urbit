@@ -742,9 +742,9 @@ $(items t.items, acc (add i.items acc))
 
 ## Resources
 
-- [Irregular Forms Reference](https://docs.urbit.org/language/hoon/reference/irregular) - Complete list
-- [Hoon Style Guide](https://docs.urbit.org/language/hoon/style) - When to use irregular
-- [Hoon Syntax](https://docs.urbit.org/language/hoon/reference/syntax) - Syntax overview
+- [Irregular Forms Reference](https://docs.urbit.org/hoon/irregular) - Complete list
+- [Hoon Style Guide](https://docs.urbit.org/hoon/style) - When to use irregular
+- [Hoon Syntax](https://docs.urbit.org/build-on-urbit/hoon-school/b-syntax) - Syntax overview
 
 ## Summary
 

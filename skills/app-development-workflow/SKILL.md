@@ -70,16 +70,18 @@ urbit -F zod  # Or any ship name
 
 ### Minimal Gall Agent Example
 
+Bind the current state with `=|`/`=*` so arms can read `state` and its fields directly. Give each state version a head tag (`%0`) so `on-load` can branch across versions.
+
 ```hoon
 /+  default-agent, dbug
 |%
-+$  versioned-state
-  $%  [%0 state-0]
-  ==
-+$  state-0  [counter=@ud]
++$  versioned-state  $%(state-0)
++$  state-0  [%0 counter=@ud]
 +$  card  card:agent:gall
 --
 %-  agent:dbug
+=|  state-0
+=*  state  -
 ^-  agent:gall
 |_  =bowl:gall
 +*  this      .
@@ -95,17 +97,17 @@ urbit -F zod  # Or any ship name
   ?>  =(src.bowl our.bowl)  :: Auth: only ship owner
   ?+    mark  (on-poke:default mark vase)
       %noun
-    =/  action  !<(?(%increment %decrement) vase)
+    =/  =action  !<(?(%increment %decrement) vase)
     ?-  action
-        %increment
-      `this(counter +(counter.state))
-        %decrement
-      `this(counter (sub counter.state 1))
+      %increment  `this(counter.state +(counter.state))
+      %decrement  `this(counter.state (dec counter.state))
     ==
   ==
 ::
-++  on-save   on-save:default
-++  on-load   on-load:default
+++  on-save  !>(state)
+++  on-load
+  |=  old=vase
+  `this(state !<(versioned-state old))
 ++  on-watch  on-watch:default
 ++  on-leave  on-leave:default
 ++  on-peek   on-peek:default
@@ -114,6 +116,8 @@ urbit -F zod  # Or any ship name
 ++  on-fail   on-fail:default
 --
 ```
+
+> For production-grade versions of every arm — crash-safe migration, mark-gated pokes, fact+kick replies, scry, Clay warps, and external installs — see [references/gall-patterns.md](references/gall-patterns.md), drawn from the Obelisk RDBMS agent.
 
 **Test in dojo**:
 ```
@@ -177,11 +181,18 @@ Metadata for app display in Grid (home screen).
 
 ### sys.kelvin
 
-Specifies kernel version compatibility.
+Specifies kernel version compatibility. A desk may list **multiple** kelvins to
+support a range of runtimes (Obelisk's `sys.kelvin`):
 
 ```hoon
-[%zuse 418]  # Current kelvin version (as of 2025)
+[%zuse 411]
+[%zuse 410]
+[%zuse 409]
+[%zuse 408]
 ```
+
+Check the ship's current kelvin with `.^(@ud %cz %$)` and ensure it appears in
+the list.
 
 ---
 
@@ -431,30 +442,75 @@ code --install-extension urbit-pilled.hoon-language-server
 5. **Version semantically**: Follow semver (major.minor.patch)
 6. **Document APIs**: Write clear sur/ structure definitions
 7. **Security**: Validate poke sources (`?>  =(src.bowl our.bowl)`)
-8. **Graceful upgrades**: Use on-save/on-load for state migration
-9. **Error handling**: `on-fail` is called AFTER a crash to handle recovery/logging. Use `?>` guards, `?~` null checks, and explicit error handling to PREVENT crashes in the first place.
+8. **Graceful upgrades**: Version-tag state; wrap `on-load` migration in `mule` with a bunt fallback so a bad migration cannot brick the agent (see [references/gall-patterns.md](references/gall-patterns.md)).
+9. **Crash containment**: Virtualize untrusted/side-effecting work with `mule` and branch on `(each result tang)`; thread new state only on `%.y`. `on-fail` runs AFTER a crash for recovery/logging — use `?>` guards, `?~` null checks, and `mule` to PREVENT crashes in the first place.
 10. **Performance**: Minimize state size, use caching
 
 ---
 
 ## Common Patterns
 
-### State Management
+> The patterns below are the generic forms. For annotated, production-grade
+> versions extracted from the Obelisk RDBMS agent, see
+> [references/gall-patterns.md](references/gall-patterns.md).
+
+### Versioned state + crash-safe migration
+
+Tag each state version at its head; union the molds in `versioned-state`.
+Wrap migration in `mule` so a bad migration logs and bunts instead of bricking
+`on-load`:
 
 ```hoon
++$  versioned-state  $%(state-0 state-1)
 +$  state-0  [%0 =counter =users]
-+$  state-1  [%1 =counter =users =settings]  # Add settings
++$  state-1  [%1 =counter =users =settings]
 
+++  on-save  !>(state)
 ++  on-load
   |=  old-vase=vase
-  =/  old  !<(versioned-state old-vase)
-  ?-  -.old
-    %0  `this(state [%1 counter.old users.old settings=~])  # Migrate
-    %1  `this(state old)  # Already current version
+  ^-  (quip card _this)
+  =/  r=(each state-1 tang)
+    %-  mule  |.
+    =/  old  !<(versioned-state old-vase)
+    ?-  -.old
+      %0  [%1 counter.old users.old settings=~]   :: migrate
+      %1  old
+    ==
+  ?:  ?=(%.y -.r)  `this(state p.r)
+  %-  (slog 'state corrupt, unable to migrate' ~)
+  `this(state *state-1)
+```
+
+### Mark-gated `on-poke`
+
+When an agent has one input mark, assert it up front, then dispatch on the
+typed action tag (clearer than a `?+ mark` fallthrough):
+
+```hoon
+++  on-poke
+  |=  [=mark =vase]
+  ^-  (quip card _this)
+  ?>  ?=(%myapp-action mark)
+  =/  act  !<(action vase)
+  ?-  -.act
+    %do-thing  ...
   ==
 ```
 
-### Subscription (Server)
+### Crash containment with `mule`
+
+Virtualize untrusted/side-effecting work so a malformed input returns an error
+fact instead of crashing the agent. Thread the new state only on success:
+
+```hoon
+=/  res=(each new-state tang)  (mule |.(run-work))
+?-  -.res
+  %.n  :_  this  [%give %fact ~[/path] %noun !>([| p.res])]~   :: keep state
+  %.y  :_  this(state p.res)  [%give %fact ~[/path] %noun !>([& p.res])]~
+==
+```
+
+### Subscription (streaming server)
 
 ```hoon
 ++  on-watch
@@ -465,6 +521,57 @@ code --install-extension urbit-pilled.hoon-language-server
     :_  this
     [%give %fact ~ %json !>((updates-to-json state))]~
   ==
+```
+
+### Request/response over a subscription (fact + kick)
+
+For one-shot replies (no persistent subscription), give a single fact then
+immediately kick the subscriber. Tag the payload with a success flag:
+
+```hoon
+++  on-watch  |=(=path `this)   :: accept, no initial state
+::  ...in on-poke, after producing `res`:
+:~  [%give %fact ~[/server] %noun !>([& res])]
+    [%give %kick ~[/server] ~]
+==
+```
+
+### Scry via `on-peek`
+
+Expose read-only state on a `%x` path; `[~ ~]` for misses:
+
+```hoon
+++  on-peek
+  |=  =path
+  ^-  (unit (unit cage))
+  ?+  path  [~ ~]
+    [%x %state ~]  ``noun+!>(state)
+  ==
+```
+
+### Clay warp at boot, handled in `on-arvo`
+
+Seed state from a file in the agent's own desk. Tag the wire so `on-arvo`
+matches it, and guard `?~ riot` / the cage mark before `!<`:
+
+```hoon
+::  on-init card:
+:*  %pass  /init/seed  %arvo  %c  %warp  our.bowl  q.byk.bowl  ~
+    %sing  %x  da+now.bowl  /path/to/file/txt
+==
+```
+
+### Installing a dependency app via Kiln
+
+Idempotent external install: scry installed desks first, poke `%hood` with
+`%kiln-install` only if absent. (Obelisk uses this to install `%hawk`.)
+
+```hoon
+=+  .^(desks=(set desk) %cd /=//=)
+?:  (~(has in desks) %hawk)  ~
+:_  ~  :*  %pass  /init/hawk/install  %agent  [our.bowl %hood]
+           %poke  %kiln-install  !>([%hawk ~publisher %hawk])
+       ==
 ```
 
 ### HTTP API Endpoint
@@ -510,11 +617,12 @@ code --install-extension urbit-pilled.hoon-language-server
 
 ## Reference
 
-- App School (full course): https://developers.urbit.org/guides/core/app-school
-- Software Distribution: https://developers.urbit.org/guides/additional/software-distribution
-- Gall Reference: https://developers.urbit.org/reference/arvo/gall/gall
+- [references/gall-patterns.md](references/gall-patterns.md) — production Gall patterns (versioned state, `mule` migration, mark-gated pokes, fact+kick, scry, Clay warps, Kiln installs) from the Obelisk agent
+- App School (full course): https://docs.urbit.org/build-on-urbit/app-school
+- Software Distribution: https://docs.urbit.org/build-on-urbit/userspace/dist/software-distribution
+- Gall Reference: https://docs.urbit.org/urbit-os/kernel/gall/gall-api
 - HTTP API: https://github.com/urbit/js-http-api
-- Hoon School: https://developers.urbit.org/guides/core/hoon-school
+- Hoon School: https://docs.urbit.org/build-on-urbit/hoon-school
 
 ---
 

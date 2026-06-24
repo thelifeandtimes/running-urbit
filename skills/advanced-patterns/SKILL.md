@@ -801,8 +801,8 @@ r3
 
 ## Resources
 
-- [Cores Guide](https://docs.urbit.org/language/hoon/guides/cores) - Advanced core patterns
-- [Doors Reference](https://docs.urbit.org/language/hoon/reference/stdlib) - Standard library doors
+- [Cores](https://docs.urbit.org/build-on-urbit/hoon-school/f-cores) - Advanced core patterns
+- [Standard Library](https://docs.urbit.org/hoon/stdlib) - Standard library doors
 - [Performance Guide](https://developers.urbit.org/guides/additional/performance) - Optimization techniques
 
 ## Summary

@@ -839,7 +839,7 @@ r3
 ## Resources
 
 - [Hoon School - Functional Programming](https://developers.urbit.org/guides/core/hoon-school/F-func) - FP in Hoon
-- [Standard Library](https://docs.urbit.org/language/hoon/reference/stdlib) - Functional utilities
+- [Standard Library](https://docs.urbit.org/hoon/stdlib) - Functional utilities
 - [Recursion Patterns](https://developers.urbit.org/guides/core/hoon-school/G-loop) - Loops and recursion
 
 ## Summary
